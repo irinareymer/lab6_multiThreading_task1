@@ -25,9 +25,7 @@ class MainActivityCoroutines: AppCompatActivity() {
             repeatOnLifecycle(Lifecycle.State.STARTED){
                 while(isActive){
                     delay(1000)
-                    textSecondsElapsed.post {
-                        textSecondsElapsed.text = getString(R.string.textSeconds, secondsElapsed++)
-                    }
+                    textSecondsElapsed.text = getString(R.string.textSeconds, secondsElapsed++)
                 }
             }
         }

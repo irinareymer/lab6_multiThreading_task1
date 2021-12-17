@@ -32,9 +32,7 @@ class MainActivityCoroutines2: AppCompatActivity() {
                 secondsElapsed = sec
                 while(isActive){
                     delay(1000)
-                    textSecondsElapsed.post {
-                        textSecondsElapsed.text = getString(R.string.textSeconds, secondsElapsed++)
-                    }
+                    textSecondsElapsed.text = getString(R.string.textSeconds, secondsElapsed++)
                 }
             }
         }

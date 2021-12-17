@@ -6,24 +6,23 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
+import java.util.concurrent.Future
 
 class MainActivityExecutor2: AppCompatActivity() {
     private var secondsElapsed: Int = 0
     private var sec: Int = 0
     private lateinit var textSecondsElapsed: TextView
     private lateinit var sharedPref: SharedPreferences
-    private lateinit var executor: ExecutorService
+    private lateinit var myApplication: MyApplication
+    private lateinit var future: Future<*>
 
     companion object{
         const val SECONDS_COUNT = "secondsElapsed"
     }
 
-    private fun initExecutor(){
-        executor = Executors.newFixedThreadPool(1)
-        executor.execute {
-            while (!executor.isShutdown) {
+    private fun initExecutor(): Future<*> {
+        return myApplication.getExecutor().submit {
+            while (!myApplication.getExecutor().isShutdown) {
                 Thread.sleep(1000)
                 textSecondsElapsed.post {
                     textSecondsElapsed.text = getString(R.string.textSeconds, secondsElapsed++)
@@ -36,6 +35,7 @@ class MainActivityExecutor2: AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         textSecondsElapsed = findViewById(R.id.textSecondsElapsed)
+        myApplication = application as MyApplication
         Log.i("LifecycleCallbacks", "Activity onCreate()")
     }
 
@@ -45,13 +45,13 @@ class MainActivityExecutor2: AppCompatActivity() {
         sec = sharedPref.getInt(SECONDS_COUNT, sec)
         secondsElapsed = sec
         textSecondsElapsed.text = getString(R.string.textSeconds, secondsElapsed)
-        initExecutor()
+        future = initExecutor()
         super.onStart()
         Log.i("LifecycleCallbacks", "Activity onStart()")
     }
 
     override fun onStop() {
-        executor.shutdown()
+        future.cancel(true)
         sharedPref = this.getSharedPreferences(
             getString(R.string.preference_file_key), Context.MODE_PRIVATE)
         sharedPref.edit().putInt(SECONDS_COUNT, secondsElapsed).apply()
